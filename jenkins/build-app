@@ -5,8 +5,8 @@ node(){
       git branch: 'main', credentialsId: '2', url: 'https://drathorerathore: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@github.com/dipeshrathore/java-app.git'
     }
 
-#    stage('build image') {
-#      baseImage = docker.build(IMAGE_NAME, "-f Dockerfile . --build-arg APP_VERSION=${params.RELEASE_VERSION} --build-arg APP_NAME=${APP_NAME} ") 
-#    }
+    stage('build image') {
+      baseImage = docker.build(IMAGE_NAME, "-f Dockerfile . --build-arg APP_VERSION=${params.RELEASE_VERSION} --build-arg APP_NAME=${APP_NAME} ") 
+    }
 
 }
