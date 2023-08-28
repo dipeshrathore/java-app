@@ -1,0 +1,53 @@
+properties([
+    parameters([
+        string(name: 'RELEASE_VERSION', defaultValue: '0.0.1', description: 'Release default version')
+    ])
+])
+
+node(){
+    
+    APP_NAME="aws-flow"
+    IMAGE_NAME="${APP_NAME}:${params.RELEASE_VERSION}"
+    AWS_ACCOUNT_ID="501932962727"
+    AWS_DEFAULT_REGION="us-east-1" 
+    REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_NAME}"
+
+    stage('clone repos') {
+      git branch: 'devops', credentialsId: '2', url: 'https://x-token-auth@bitbucket.org/chocolate-bourbon/aws-flow.git'
+    }
+
+    stage('build image') {
+      baseImage = docker.build(IMAGE_NAME, "-f Dockerfile . --build-arg APP_VERSION=${params.RELEASE_VERSION} --build-arg APP_NAME=${APP_NAME} ") 
+    }
+    stage('push image') {
+      sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+      sh "docker tag ${IMAGE_NAME} ${REPOSITORY_URI}"
+      sh "docker push ${REPOSITORY_URI}"
+    }
+
+    stage('remove dangling image'){
+      sh "docker rmi ${REPOSITORY_URI}"
+      sh "docker rmi ${IMAGE_NAME}"
+    }
+
+    stage('push email notification') {
+      env.KFLOW_ONBOARD_CLIENT_EMAILS.split(',').each {
+                emailext (
+                to: it,
+                subject: "Release Notification - ${APP_NAME} - ${params.RELEASE_VERSION}",
+                body: """\
+                    <html>
+                    <body>
+                        <p>Hello,</p>
+                        <p>A new release  ${params.RELEASE_VERSION} is available for ${APP_NAME}. You can now upgrade your application.</p>
+                        <p>--<br>Thanks</p>
+                    </body>
+                    </html>
+                """,
+                mimeType: 'text/html',
+                from: "release-test"
+                )
+      }
+    }
+}
+
