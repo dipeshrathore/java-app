@@ -8,7 +8,7 @@ node(){
       bat label: 'Build the application', script: 'mvnw clean install'
     }
     stage('build') {
-      bat label: 'Run the application', script: 'start /B cmd /c "mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081 > stdout.log 2> stderr.log"'
+      bat label: 'Run the application', script: 'start /B cmd /c "mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081"'
     }
 
 }
