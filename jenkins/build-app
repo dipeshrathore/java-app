@@ -4,7 +4,7 @@ node(){
     stage('clone repos') {
       git branch: 'main', credentialsId: '2', url: 'https://drathorerathore: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@github.com/dipeshrathore/java-app.git'
     }
-    stage('Build and Test') {
+    stage('build') {
         sh 'mvn -version'
     }
     stage('Build and run') {
